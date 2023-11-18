@@ -1,5 +1,8 @@
 from ape import accounts, project
 
+HEADS = 2
+TAILS = 4
+
 
 def owner():
     return accounts.test_accounts[0]
@@ -8,15 +11,12 @@ def owner():
 def deploy(account: str):
     print(f"Account balance: {account.balance}")
 
-    rng = account.deploy(project.RandomMock)
+    rng = account.deploy(project.VRFConsumerMock)
     contract = account.deploy(project.Coinflip, rng.address)
     return contract
 
     
 def play(coinflip):
-    HEADS = 2
-    TAILS = 4
-
     player_one = accounts.test_accounts[1]
     player_two = accounts.test_accounts[2]
     player_three = accounts.test_accounts[3]
@@ -26,6 +26,10 @@ def play(coinflip):
     start_txn = coinflip.start(HEADS, sender=player_one, value="1 gwei")
     join_txn = coinflip.join(TAILS, sender=player_two, value="1 gwei")
     join_txn = coinflip.join(HEADS, sender=player_three, value="1 gwei")
+
+    txn_cost = coinflip.resolve.estimate_gas_cost(sender=player_one)
+    print(txn_cost)
+
     resolve_txn = coinflip.resolve(sender=player_one)
 
     print(start_txn.decode_logs(coinflip.Join)[0])
