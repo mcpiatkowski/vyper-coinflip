@@ -54,6 +54,7 @@ struct Player:
 owner: public(address)
 max_players: public(uint256)
 vrf_consumer: public(VRFConsumer)
+random_number: public(uint256)
 
 min_bet: public(uint256)
 bet_amount: public(uint256)
@@ -169,13 +170,12 @@ def join(side: Side):
     self._bet(msg.value, msg.sender)
     
 
-@internal
-def _get_random_number() -> uint256:
+@external
+def get_random_number() -> uint256:
     """
     @dev This functionality is mocked for development purpose.
     @return Random number from Chainlink VRF.
     """
-    self.vrf_consumer.request_random_words()
     return self.vrf_consumer.random_words(0)
 
 
@@ -185,7 +185,7 @@ def _flip() -> Side:
     @notice Only HEADS or TAILS can win.
     @return Winning side of the coin.
     """
-    if self._get_random_number() % 2 == 0:
+    if self.random_number % 2 == 0:
         log WinningSide(Side.HEADS)
         return Side.HEADS
     else:
@@ -237,7 +237,8 @@ def _reset_game():
         player.side = Side.UNKNOWN
         player.status = PlayerStatus.COWARD
         self.players[_player] = player
-        
+    
+    self.pot = 0
     self.bag_of_winners = []
     self.bag_of_players = []
     self.coinflip_status = CoinflipStatus.DONE
@@ -251,6 +252,15 @@ def _resolve():
     self.coinflip_status = CoinflipStatus.FLIPPING
     self.winning_side = self._flip()
     self._send(self._payout())
+
+
+@external
+def flip():
+    """
+    @notice Random word rewquest needs to be a separate txn.
+    """
+    assert self.players[msg.sender].status == PlayerStatus.JOINED
+    self.vrf_consumer.request_random_words()
 
 
 @external
