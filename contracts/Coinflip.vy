@@ -171,12 +171,12 @@ def join(side: Side):
     
 
 @external
-def get_random_number() -> uint256:
+def get_random_number():
     """
     @dev This functionality is mocked for development purpose.
     @return Random number from Chainlink VRF.
     """
-    return self.vrf_consumer.random_words(0)
+    self.random_number = self.vrf_consumer.random_words(0)
 
 
 @internal

@@ -10,6 +10,17 @@ The contract works but I **do not** recommend using it that way. VRF functionali
 
 Ideally VRF consumer should be a part of the Coinflip contract.
 
+Contract deployed on the above address does not reset the pot and does not assign requested random number to the internal random number. Code in the repo already contemplates both.
+
+## Order of calls
+
+To verify the coinflip works you can call the contract in the following order:
+- start
+- join
+- flip
+- get_random_number
+- resolve
+
 # Resources
 
 ## Faucets
